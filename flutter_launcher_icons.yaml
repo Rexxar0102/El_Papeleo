@@ -1,0 +1,8 @@
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icons/el_papeleo_ico.png"
+  adaptive_icon_background: "#1F618D"
+  adaptive_icon_foreground: "assets/icons/el_papeleo_ico.png"
+  remove_alpha_ios: true
+  min_sdk_android: 21
