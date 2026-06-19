@@ -34,7 +34,6 @@
 | 🔍 **Búsqueda** | Encuentra cualquier trámite al instante con búsqueda en tiempo real |
 | ⭐ **Favoritos** | Guarda tus trámites más usados para acceso rápido |
 | 📋 **Detalle Completo** | Cada trámite incluye: requisitos, costos, horarios, plazos y ubicación |
-| 📍 **Mapas** | Abre la ubicación de cada trámite directamente en Google Maps |
 | 💡 **Sugerencias** | Envía ideas para mejorar la app o solicitar nuevos trámites |
 | 💬 **Foro Público** | Vota y comenta sugerencias de otros usuarios |
 | 🔔 **Notificaciones** | Recibe alertas cuando cambie el estado de tus sugerencias |
