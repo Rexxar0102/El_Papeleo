@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/sugerencia.dart';
 import 'notification_service.dart';
@@ -51,7 +52,13 @@ class RealtimeSugerenciasService {
         ),
         callback: _handleDelete,
       )
-      .subscribe();
+      .subscribe((status, error) {
+        if (status == RealtimeSubscribeStatus.subscribed) {
+          debugPrint('Realtime sugerencias suscrito correctamente');
+        } else if (status == RealtimeSubscribeStatus.channelError) {
+          debugPrint('Error en suscripción Realtime sugerencias: $error');
+        }
+      });
   }
 
   static void _handleInsert(PostgresChangePayload payload) {

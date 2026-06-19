@@ -2,25 +2,23 @@
 build/
 .dart_tool/
 .packages
-.dart_tool/
+.pub-cache/
+.pub/
 .flutter-plugins*
-.cocoapods/
+flutter_export_environment.sh
 
 # IDE
 .idea/
-.vscode/
 *.iml
+.vscode/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Dependencies
-node_modules/
-package-lock.json
-
 # Secrets
 lib/config/secrets.dart
 .env
-.env.example
-*.key
+
+# Dependencies
+node_modules/

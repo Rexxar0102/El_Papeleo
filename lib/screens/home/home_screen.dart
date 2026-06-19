@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../config/constants.dart';
@@ -9,8 +10,7 @@ import '../../services/hive_service.dart';
 import '../../widgets/tramite_card.dart';
 import '../../widgets/search_bar.dart';
 import '../../widgets/sync_status_indicator.dart';
-import '../sugerencias/sugerencias_screen.dart';
-import '../about/about_screen.dart';
+import '../../widgets/app_snackbar.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -54,6 +54,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
+        showAppSnackBar(context, 'Error al cargar datos', backgroundColor: AppColors.rojoCautela);
       }
     }
   }
@@ -86,6 +87,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _onTabChanged(int index) {
+    HapticFeedback.lightImpact();
     setState(() {
       _currentTab = index;
       _selectedCategoriaId = null;
@@ -224,9 +226,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             final tramite = _filteredTramites[index];
                             return TramiteCard(
                               tramite: tramite,
-                              onTap: () => context
-                                  .push('/tramite/${tramite.id}')
-                                  .then((_) => _loadData()),
+                              onTap: () {
+                                HapticFeedback.selectionClick();
+                                context.push('/tramite/${tramite.id}').then((_) => _loadData());
+                              },
                             );
                           },
                         ),
@@ -325,12 +328,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               title: const Text('Sugerencias'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SugerenciasScreen(),
-                  ),
-                );
+                context.push('/sugerencias');
               },
             ),
             ListTile(
@@ -338,12 +336,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               title: const Text('Acerca de'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AboutScreen(),
-                  ),
-                );
+                context.push('/about');
               },
             ),
             const Divider(),

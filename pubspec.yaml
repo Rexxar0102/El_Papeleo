@@ -1,7 +1,7 @@
 name: el_papeleo
 description: "Guía de trámites en Cuba - App móvil offline-first"
 publish_to: 'none'
-version: 1.0.2+1
+version: 1.0.3+2
 
 environment:
   sdk: ^3.12.0

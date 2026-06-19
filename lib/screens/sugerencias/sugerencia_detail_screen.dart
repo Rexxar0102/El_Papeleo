@@ -15,6 +15,7 @@ class SugerenciaDetailScreen extends StatefulWidget {
 class _SugerenciaDetailScreenState extends State<SugerenciaDetailScreen> {
   Sugerencia? _sugerencia;
   bool _loading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -23,6 +24,11 @@ class _SugerenciaDetailScreenState extends State<SugerenciaDetailScreen> {
   }
 
   Future<void> _loadSugerencia() async {
+    setState(() {
+      _loading = true;
+      _hasError = false;
+    });
+
     try {
       final sugerencia = await SugerenciaService.getById(widget.sugerenciaId);
       if (mounted) {
@@ -33,7 +39,10 @@ class _SugerenciaDetailScreenState extends State<SugerenciaDetailScreen> {
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _loading = false);
+        setState(() {
+          _loading = false;
+          _hasError = true;
+        });
       }
     }
   }
@@ -46,9 +55,11 @@ class _SugerenciaDetailScreenState extends State<SugerenciaDetailScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : _sugerencia == null
-              ? const Center(child: Text('No se pudo cargar la sugerencia'))
-              : _buildContent(context, _sugerencia!),
+          : _hasError
+              ? _buildErrorState()
+              : _sugerencia == null
+                  ? _buildErrorState()
+                  : _buildContent(context, _sugerencia!),
     );
   }
 
@@ -219,6 +230,40 @@ class _SugerenciaDetailScreenState extends State<SugerenciaDetailScreen> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.rojoCautela.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.cloud_off, size: 48, color: AppColors.rojoCautela.withValues(alpha: 0.5)),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'No se pudo cargar la sugerencia',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.grisOscuro),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Verifica tu conexión e intenta de nuevo',
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: _loadSugerencia,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reintentar'),
+          ),
+        ],
+      ),
     );
   }
 

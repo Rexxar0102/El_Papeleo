@@ -4,6 +4,7 @@ import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/tramite/tramite_detail_screen.dart';
 import '../screens/about/about_screen.dart';
+import '../screens/sugerencias/sugerencias_screen.dart';
 import '../screens/sugerencias/sugerencia_detail_screen.dart';
 import '../services/hive_service.dart';
 
@@ -19,8 +20,12 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/home',
-      pageBuilder: (context, state) => const NoTransitionPage(
-        child: HomeScreen(),
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const HomeScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
+        transitionDuration: const Duration(milliseconds: 300),
       ),
     ),
     GoRoute(
@@ -33,6 +38,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/about',
       builder: (context, state) => const AboutScreen(),
+    ),
+    GoRoute(
+      path: '/sugerencias',
+      builder: (context, state) => const SugerenciasScreen(),
     ),
     GoRoute(
       path: '/sugerencia/:id',

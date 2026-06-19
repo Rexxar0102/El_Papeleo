@@ -33,16 +33,19 @@ class TramiteCard extends StatelessWidget {
               // Header
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.azulConfianza.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.description_outlined,
-                      color: AppColors.azulConfianza,
-                      size: 24,
+                  Hero(
+                    tag: 'tramite_icon_${tramite.id}',
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.azulConfianza.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.description_outlined,
+                        color: AppColors.azulConfianza,
+                        size: 24,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),

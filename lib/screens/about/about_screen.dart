@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../config/constants.dart';
 import '../../services/update_service.dart';
+import '../../widgets/app_snackbar.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -21,9 +22,7 @@ class _AboutScreenState extends State<AboutScreen> {
     setState(() => _checking = false);
 
     if (!updateInfo.hasUpdate) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ya tienes la última versión')),
-      );
+      showAppSnackBar(context, 'Ya tienes la última versión');
       return;
     }
 
@@ -87,9 +86,7 @@ class _AboutScreenState extends State<AboutScreen> {
     Navigator.pop(context);
 
     if (!success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error al descargar la actualización')),
-      );
+      showAppSnackBar(context, 'Error al descargar la actualización. Verifica tu conexión e intenta de nuevo.', backgroundColor: AppColors.rojoCautela);
     }
   }
 
@@ -151,7 +148,7 @@ class _AboutScreenState extends State<AboutScreen> {
                       _buildInfoRow(
                         icon: Icons.info_outline,
                         label: 'Versión',
-                        value: '1.0.2',
+                        value: '1.0.3',
                       ),
                       const Divider(height: 24),
                       _buildInfoRow(

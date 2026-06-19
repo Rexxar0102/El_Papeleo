@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../config/constants.dart';
 
@@ -18,9 +19,18 @@ class AppSearchBar extends StatefulWidget {
 class _AppSearchBarState extends State<AppSearchBar> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  Timer? _debounce;
+
+  void _onSearchChanged(String query) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      widget.onChanged(query);
+    });
+  }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -43,7 +53,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
       child: TextField(
         controller: _controller,
         focusNode: _focusNode,
-        onChanged: widget.onChanged,
+        onChanged: _onSearchChanged,
         decoration: InputDecoration(
           hintText: widget.hintText ?? 'Buscar trámite...',
           hintStyle: TextStyle(
@@ -61,6 +71,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                   ),
                   onPressed: () {
                     _controller.clear();
+                    _debounce?.cancel();
                     widget.onChanged('');
                   },
                 )

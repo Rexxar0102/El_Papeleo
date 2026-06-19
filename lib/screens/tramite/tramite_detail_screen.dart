@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,7 @@ import '../../config/constants.dart';
 import '../../models/tramite.dart';
 import '../../services/hive_service.dart';
 import '../../widgets/requirement_item.dart';
+import '../../widgets/app_snackbar.dart';
 
 class TramiteDetailScreen extends ConsumerStatefulWidget {
   final String tramiteId;
@@ -40,6 +42,7 @@ class _TramiteDetailScreenState extends ConsumerState<TramiteDetailScreen> {
   }
 
   void _toggleFavorite() async {
+    HapticFeedback.mediumImpact();
     if (_isFavorite) {
       await HiveService.removeFavorito(widget.tramiteId);
     } else {
@@ -48,18 +51,10 @@ class _TramiteDetailScreenState extends ConsumerState<TramiteDetailScreen> {
     setState(() => _isFavorite = !_isFavorite);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _isFavorite ? 'Agregado a Favoritos' : 'Eliminado de Favoritos',
-          ),
-          backgroundColor: _isFavorite ? AppColors.verdeEsperanza : Colors.grey,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          duration: const Duration(seconds: 1),
-        ),
+      showAppSnackBar(
+        context,
+        _isFavorite ? 'Agregado a Favoritos' : 'Eliminado de Favoritos',
+        backgroundColor: _isFavorite ? AppColors.verdeEsperanza : Colors.grey,
       );
     }
   }
@@ -124,25 +119,28 @@ class _TramiteDetailScreenState extends ConsumerState<TramiteDetailScreen> {
                   color: Colors.white,
                 ),
               ),
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.azulConfianza,
-                      AppColors.azulConfianzaDark,
-                    ],
+              background: Hero(
+                tag: 'tramite_icon_${_tramite!.id}',
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.azulConfianza,
+                        AppColors.azulConfianzaDark,
+                      ],
+                    ),
                   ),
-                ),
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Icon(
-                      Icons.description_outlined,
-                      size: 60,
-                      color: Colors.white.withValues(alpha: 0.15),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Icon(
+                        Icons.description_outlined,
+                        size: 60,
+                        color: Colors.white.withValues(alpha: 0.15),
+                      ),
                     ),
                   ),
                 ),

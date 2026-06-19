@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import '../../config/constants.dart';
 import '../../models/sugerencia.dart';
 import '../../services/sugerencia_service.dart';
 import '../../services/hive_service.dart';
 import '../../services/novedades_service.dart';
-import 'sugerencia_detail_screen.dart';
+import '../../widgets/app_snackbar.dart';
 
 class SugerenciasScreen extends StatefulWidget {
   const SugerenciasScreen({super.key});
@@ -18,6 +20,7 @@ class _SugerenciasScreenState extends State<SugerenciasScreen> {
   List<Sugerencia> _sugerencias = [];
   List<Sugerencia> _filteredSugerencias = [];
   bool _isLoading = true;
+  bool _hasError = false;
   int _remainingSuggestions = 3;
   String _estadoFilter = 'todos';
   late StreamSubscription<List<Sugerencia>> _novedadesSubscription;
@@ -42,16 +45,30 @@ class _SugerenciasScreenState extends State<SugerenciasScreen> {
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    final sugerencias = await SugerenciaService.getSugerencias();
-    final remaining = await SugerenciaService.getRemainingSuggestions();
-    if (mounted) {
-      setState(() {
-        _sugerencias = sugerencias;
-        _remainingSuggestions = remaining;
-        _isLoading = false;
-        _applyFilter();
-      });
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+
+    try {
+      final sugerencias = await SugerenciaService.getSugerencias();
+      final remaining = await SugerenciaService.getRemainingSuggestions();
+      if (mounted) {
+        setState(() {
+          _sugerencias = sugerencias;
+          _remainingSuggestions = remaining;
+          _isLoading = false;
+          _applyFilter();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+        showAppSnackBar(context, 'Error al cargar sugerencias');
+      }
     }
   }
 
@@ -74,12 +91,7 @@ class _SugerenciasScreenState extends State<SugerenciasScreen> {
 
   void _showCreateDialog() {
     if (_remainingSuggestions <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Has alcanzado el límite de 3 sugerencias'),
-          backgroundColor: AppColors.rojoCautela,
-        ),
-      );
+      showAppSnackBar(context, 'Has alcanzado el límite de 3 sugerencias', backgroundColor: AppColors.rojoCautela);
       return;
     }
 
@@ -233,9 +245,11 @@ class _SugerenciasScreenState extends State<SugerenciasScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _filteredSugerencias.isEmpty
-              ? _buildEmptyState()
-              : RefreshIndicator(
+          : _hasError
+              ? _buildErrorState()
+              : _filteredSugerencias.isEmpty
+                  ? _buildEmptyState()
+                  : RefreshIndicator(
                   onRefresh: _loadData,
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -294,12 +308,7 @@ class _SugerenciasScreenState extends State<SugerenciasScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SugerenciaDetailScreen(sugerenciaId: sugerencia.id!),
-          ),
-        ),
+        onTap: () => context.push('/sugerencia/${sugerencia.id}'),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -372,6 +381,7 @@ class _SugerenciasScreenState extends State<SugerenciasScreen> {
                       final hasLiked = HiveService.hasLikedSugerencia(sugerencia.id!);
                       return InkWell(
                         onTap: hasLiked ? null : () async {
+                          HapticFeedback.selectionClick();
                           await SugerenciaService.likeSugerencia(sugerencia.id!);
                           _loadData();
                         },
@@ -401,6 +411,40 @@ class _SugerenciasScreenState extends State<SugerenciasScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.rojoCautela.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.cloud_off, size: 48, color: AppColors.rojoCautela.withValues(alpha: 0.5)),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Error de conexión',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.grisOscuro),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'No se pudieron cargar las sugerencias',
+            style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: _loadData,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Reintentar'),
+          ),
+        ],
       ),
     );
   }
@@ -487,12 +531,7 @@ class _CreateSugerenciaSheetState extends State<_CreateSugerenciaSheet> {
     } else {
       setState(() => _isSubmitting = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al crear sugerencia'),
-            backgroundColor: AppColors.rojoCautela,
-          ),
-        );
+        showAppSnackBar(context, 'Error al crear sugerencia', backgroundColor: AppColors.rojoCautela);
       }
     }
   }
